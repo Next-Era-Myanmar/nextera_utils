@@ -1,4 +1,8 @@
-mod models;
+//! # Next Era Utils
+//!
+//! Next Era Solutions Utilities for Rust.
+
+pub mod models;
 
 #[cfg(test)]
 mod tests {
