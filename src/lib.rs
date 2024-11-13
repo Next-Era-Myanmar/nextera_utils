@@ -3,6 +3,7 @@
 //! Next Era Solutions Utilities for Rust.
 
 pub mod models;
+pub mod parser;
 
 #[cfg(test)]
 mod tests {
