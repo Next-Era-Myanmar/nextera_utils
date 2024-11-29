@@ -5,6 +5,8 @@
 pub mod models;
 pub mod parser;
 pub mod password;
+pub mod jwt;
+pub mod time;
 
 #[cfg(test)]
 mod tests {
@@ -53,14 +55,14 @@ mod tests {
             Ok(hashed_password) => {
                 match Password::verify_password(hashed_password.clone(), password) {
                     Ok(result) => assert_eq!(result, true),
-                    Err(e) => panic!("Failed to verify password"),
+                    Err(_) => panic!("Failed to verify password"),
                 }
                 match Password::verify_password(hashed_password, wrong_password) {
                     Ok(result) => assert_eq!(result, false),
-                    Err(e) => panic!("Failed to verify password"),
+                    Err(_) => panic!("Failed to verify password"),
                 }
             }
-            Err(e) => panic!("Failed to hashed password"),
+            Err(_) => panic!("Failed to hashed password"),
         }
     }
 }
