@@ -2,22 +2,30 @@
 //!
 //! Next Era Solutions Utilities for Rust.
 
+pub mod jwt;
 pub mod models;
 pub mod parser;
 pub mod password;
-pub mod jwt;
 pub mod time;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::jwt::{get_user_id_from_token, validate_jwt};
+    use crate::time::Time;
 
     #[test]
     fn testing_models() {
+        // Response Message
         let response = models::response_message::ResponseMessage {
             message: String::from("Hello"),
         };
         assert_eq!(response.message, String::from("Hello"));
+
+        // Response Data
+        let res_data = models::response_data::ResponseData::<i32>{ data: vec![1,2,3], total: 3};
+        assert_eq!(res_data.data.len(), 3);
+        assert_eq!(res_data.total, 3);
     }
 
     #[test]
@@ -63,6 +71,38 @@ mod tests {
                 }
             }
             Err(_) => panic!("Failed to hashed password"),
+        }
+    }
+
+    #[test]
+    fn testing_time() {
+        let current_utc_time = Time::get_utc();
+        let default_time = String::from("1");
+        assert_ne!(current_utc_time.to_string(), default_time);
+    }
+
+    #[test]
+    fn testing_jwt() {
+        let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjMsImV4cCI6MTczMjIwMDQ3NywiaXNzIjoiTmV4dCBFcmEgQXV0aGVudGljYWl0b24gU2VydmljZSIsImF1ZCI6Ik5FWFQgRVJBIFVTRVIifQ.dSFOwqIq_FtTTU1GuB7KVROgQP6sjtfWRLtozG-JrR4";
+        let secret =
+            "ACCESS_SECRET_2024!@#super_secure_random_string_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let audience = "NEXT ERA USER";
+        match validate_jwt(token, secret, audience) {
+            Ok(_) => {
+                panic!( "Expired Token!")
+            }
+            Err(_) => {
+                println!("Token is expired!");
+                assert_eq!(true, true)
+            }
+        };
+        match get_user_id_from_token(token) {
+            Ok(result) => {
+                assert_eq!(result, 3)
+            }
+            Err(_) => {
+                panic!("Failed to get user id")
+            }
         }
     }
 }
