@@ -105,4 +105,36 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_generate_strong_password_length() {
+        let length = 12;
+        let password = password::generate_strong_password(length);
+        assert_eq!(password.len(), length);
+    }
+
+    #[test]
+    fn test_generate_strong_password_complexity() {
+        let length = 12;
+        let password = password::generate_strong_password(length);
+
+        // Ensure password contains at least one lowercase letter
+        assert!(password.chars().any(|c| c.is_lowercase()));
+
+        // Ensure password contains at least one uppercase letter
+        assert!(password.chars().any(|c| c.is_uppercase()));
+
+        // Ensure password contains at least one digit
+        assert!(password.chars().any(|c| c.is_digit(10)));
+
+        // Ensure password contains at least one special character
+        let special_chars = "!@#$%^&*()_+{}[]:;<>,.?/|~`";
+        assert!(password.chars().any(|c| special_chars.contains(c)));
+    }
+
+    #[test]
+    #[should_panic(expected = "Password length must be at least 4 to ensure complexity.")]
+    fn test_generate_strong_password_too_short() {
+        password::generate_strong_password(3);
+    }
 }

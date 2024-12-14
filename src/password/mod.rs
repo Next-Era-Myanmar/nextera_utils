@@ -1,5 +1,7 @@
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use rand::distributions::Alphanumeric;
+use rand::Rng;
 use rand::rngs::OsRng;
 
 pub struct Password;
@@ -61,4 +63,45 @@ impl Password {
             .verify_password(password.as_bytes(), &parsed_hash)
             .is_ok())
     }
+}
+
+/// Generates a strong password of specified length `n`
+/// The password contains uppercase, lowercase, digits, and special characters.
+pub fn generate_strong_password(n: usize) -> String {
+    // Define character groups
+    const SPECIAL_CHARS: &str = "!@#$%^&*()_+{}[]:;<>,.?/|~`";
+
+    // Ensure we have enough characters for a strong password
+    if n < 4 {
+        panic!("Password length must be at least 4 to ensure complexity.");
+    }
+
+    let mut rng = rand::thread_rng();
+
+    // Generate at least one character from each group
+    let mut password = vec![
+        (rng.sample(Alphanumeric) as char).to_ascii_lowercase(), // Lowercase
+        (rng.sample(Alphanumeric) as char).to_ascii_uppercase(), // Uppercase
+        rng.gen_range('0'..='9'),                               // Digit
+        SPECIAL_CHARS.chars().nth(rng.gen_range(0..SPECIAL_CHARS.len())).unwrap(), // Special character
+    ];
+
+    // Fill the rest of the password with random alphanumeric or special characters
+    password.extend(
+        (0..n - 4).map(|_| {
+            let choice = rng.gen_range(0..3);
+            match choice {
+                0 => (rng.sample(Alphanumeric) as char).to_ascii_lowercase(), // Lowercase
+                1 => (rng.sample(Alphanumeric) as char).to_ascii_uppercase(), // Uppercase
+                _ => SPECIAL_CHARS.chars().nth(rng.gen_range(0..SPECIAL_CHARS.len())).unwrap(), // Special
+            }
+        })
+    );
+
+    // Shuffle the password to avoid predictable patterns
+    use rand::seq::SliceRandom;
+    password.shuffle(&mut rng);
+
+    // Collect the password into a String and return
+    password.into_iter().collect()
 }
