@@ -26,6 +26,11 @@ mod tests {
         let res_data = models::response_data::ResponseData::<i32>{ data: vec![1,2,3], total: 3};
         assert_eq!(res_data.data.len(), 3);
         assert_eq!(res_data.total, 3);
+
+        // Service Response
+        let res_data = models::service_response::ServiceResponse{ status_code:200,message:String::from("Hello")};
+        assert_eq!(res_data.status_code, 200);
+        assert_eq!(res_data.message, String::from("Hello"));
     }
 
     #[test]
