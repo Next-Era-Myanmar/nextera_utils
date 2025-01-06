@@ -11,7 +11,7 @@ pub mod time;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::jwt::{get_user_id_from_token, validate_jwt};
+    use crate::jwt::{get_jwt_claims_from_token, get_user_id_from_token, validate_jwt};
     use crate::time::Time;
 
     #[test]
@@ -109,6 +109,17 @@ mod tests {
         match get_user_id_from_token(token) {
             Ok(result) => {
                 assert_eq!(result, 3)
+            }
+            Err(_) => {
+                panic!("Failed to get user id")
+            }
+        }
+        match get_jwt_claims_from_token(token) {
+            Ok(result) => {
+                assert_eq!(result.sub, 3);
+                assert_eq!(result.iss, String::from("Next Era Authenticaiton Service"));
+                assert_eq!(result.exp, 1732200477usize);
+                assert_eq!(result.aud, audience.to_string());
             }
             Err(_) => {
                 panic!("Failed to get user id")
