@@ -11,7 +11,8 @@ pub mod time;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::jwt::{get_user_id_from_token, validate_jwt};
+    use crate::jwt::{get_jwt_claims_from_token, get_user_id_from_token, validate_jwt};
+    use crate::password::PasswordHasherType;
     use crate::time::Time;
 
     #[test]
@@ -23,14 +24,28 @@ mod tests {
         assert_eq!(response.message, String::from("Hello"));
 
         // Response Data
-        let res_data = models::response_data::ResponseData::<i32>{ data: vec![1,2,3], total: 3};
+        let res_data = models::response_data::ResponseData::<i32> {
+            data: vec![1, 2, 3],
+            total: 3,
+        };
         assert_eq!(res_data.data.len(), 3);
         assert_eq!(res_data.total, 3);
 
         // Service Response
-        let res_data = models::service_response::ServiceResponse{ status_code:200,message:String::from("Hello")};
+        let res_data = models::service_response::ServiceResponse {
+            status_code: 200,
+            message: String::from("Hello"),
+        };
         assert_eq!(res_data.status_code, 200);
         assert_eq!(res_data.message, String::from("Hello"));
+
+        // Cache Data
+        let res_data = models::cache_data::CacheData::<i32> {
+            data: vec![1, 2, 3],
+            total: 3,
+        };
+        assert_eq!(res_data.data.len(), 3);
+        assert_eq!(res_data.total, 3);
     }
 
     #[test]
@@ -64,13 +79,21 @@ mod tests {
         let password: String = String::from("Password");
         let wrong_password: String = String::from("Passwords");
 
-        match Password::hash_password(password.clone()) {
+        match Password::hash_password(password.clone(), PasswordHasherType::Argon2) {
             Ok(hashed_password) => {
-                match Password::verify_password(hashed_password.clone(), password) {
+                match Password::verify_password(
+                    hashed_password.clone(),
+                    password,
+                    PasswordHasherType::Argon2,
+                ) {
                     Ok(result) => assert_eq!(result, true),
                     Err(_) => panic!("Failed to verify password"),
                 }
-                match Password::verify_password(hashed_password, wrong_password) {
+                match Password::verify_password(
+                    hashed_password,
+                    wrong_password,
+                    PasswordHasherType::Argon2,
+                ) {
                     Ok(result) => assert_eq!(result, false),
                     Err(_) => panic!("Failed to verify password"),
                 }
@@ -97,7 +120,7 @@ mod tests {
         let audience = "NEXT ERA USER";
         match validate_jwt(token, secret, audience) {
             Ok(_) => {
-                panic!( "Expired Token!")
+                panic!("Expired Token!")
             }
             Err(_) => {
                 println!("Token is expired!");
@@ -107,6 +130,17 @@ mod tests {
         match get_user_id_from_token(token) {
             Ok(result) => {
                 assert_eq!(result, 3)
+            }
+            Err(_) => {
+                panic!("Failed to get user id")
+            }
+        }
+        match get_jwt_claims_from_token(token) {
+            Ok(result) => {
+                assert_eq!(result.sub, 3);
+                assert_eq!(result.iss, String::from("Next Era Authenticaiton Service"));
+                assert_eq!(result.exp, 1732200477usize);
+                assert_eq!(result.aud, audience.to_string());
             }
             Err(_) => {
                 panic!("Failed to get user id")

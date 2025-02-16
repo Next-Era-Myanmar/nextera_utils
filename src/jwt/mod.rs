@@ -85,6 +85,30 @@ pub fn get_user_id_from_token(token: &str) -> Result<i32, String> {
     Ok(claims.sub)
 }
 
+pub fn get_jwt_claims_from_token(token: &str) -> Result<Claims, String> {
+    // Split the token into header, payload, and signature
+    let parts: Vec<&str> = token.split('.').collect();
+    if parts.len() != 3 {
+        return Err("Invalid token format".to_string());
+    }
+
+    // Normalize and decode the payload (Base64 URL decoding)
+    let normalized_payload = normalize_base64(parts[1]);
+    let payload = general_purpose::URL_SAFE
+        .decode(normalized_payload)
+        .map_err(|e| format!("Base64 decoding failed: {}", e))?;
+
+    // Convert payload to a string
+    let payload_str =
+        String::from_utf8(payload).map_err(|e| format!("Invalid UTF-8 in payload: {}", e))?;
+
+    // Deserialize JSON into Claims
+    let claims: Claims = serde_json::from_str(&payload_str)
+        .map_err(|e| format!("Failed to deserialize claims: {}", e))?;
+
+    Ok(claims)
+}
+
 fn normalize_base64(input: &str) -> String {
     let mut normalized = input.to_string();
     while normalized.len() % 4 != 0 {
