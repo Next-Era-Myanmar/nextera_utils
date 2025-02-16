@@ -1,4 +1,4 @@
-use chrono::{NaiveDateTime, Utc};
+use chrono::{Local, NaiveDateTime, Utc};
 
 pub struct Time;
 
@@ -28,6 +28,6 @@ impl Time {
     /// ```
     pub fn get_now() -> NaiveDateTime {
         // Get the Naive Datetime
-        NaiveDateTime::now()
+        Local::now().naive_local()
     }
 }
