@@ -84,6 +84,9 @@ mod tests {
         let current_utc_time = Time::get_utc();
         let default_time = String::from("1");
         assert_ne!(current_utc_time.to_string(), default_time);
+        let current_time = Time::get_now();
+        let default_time1 = String::from("1");
+        assert_ne!(current_time.to_string(), default_time1);
     }
 
     #[test]

@@ -17,4 +17,17 @@ impl Time {
         // Convert it to a naive UTC datetime
         utc_time.naive_utc()
     }
+
+    /// ### Get current naive time.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// use nextera_utils::time::Time;
+    /// println!("{}" ,Time::get_now().to_string());
+    /// ```
+    pub fn get_now() -> NaiveDateTime {
+        // Get the Naive Datetime
+        NaiveDateTime::now()
+    }
 }
