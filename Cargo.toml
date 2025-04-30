@@ -1,6 +1,6 @@
 [package]
 name = "nextera_utils"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2021"
 authors = ["Nyan Lin Soe <nyan.ucsp@gmail.com>"]
 description = "Next Era Myanmar Solutions Utilities for Rust"
@@ -10,7 +10,7 @@ repository = "https://github.com/Next-Era-Myanmar/nextera_utils"
 [dependencies]
 argon2 = "0.5.3"
 base64 = "0.22.1"
-bcrypt = "0.16.0"
+bcrypt = "0.17.0"
 chrono = "0.4.39"
 jsonwebtoken = "9.3.0"
 rand = "0.8.5"

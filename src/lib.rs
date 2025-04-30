@@ -110,6 +110,15 @@ mod tests {
         let current_time = Time::get_now();
         let default_time1 = String::from("1");
         assert_ne!(current_time.to_string(), default_time1);
+        let timezones = Time::get_supported_timezones();
+        let failed = timezones.is_empty();
+        assert!(!failed);
+        let mm_timezone = String::from("UTC+06:30");
+        let checked_timezone = Time::validate_timezone(&mm_timezone);
+        assert_eq!(checked_timezone, mm_timezone);
+        let utc_datetime = Time::get_utc();
+        let converted_datetime = Time::convert_timezone(utc_datetime, mm_timezone);
+        assert_ne!(converted_datetime.to_string(), utc_datetime.to_string());
     }
 
     #[test]
