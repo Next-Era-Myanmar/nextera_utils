@@ -1,12 +1,15 @@
-use base64::Engine;
+use crate::time::Time;
 use base64::engine::general_purpose;
-use jsonwebtoken::{decode, DecodingKey, TokenData, Validation};
+use base64::Engine;
+use chrono::{Duration, NaiveDateTime};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
 
 /// ### Default claim struct for authentication.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: i32,    // subject (user ID)
+    pub org: i32,    // organization ID
     pub exp: usize,  // expiration timestamp
     pub iss: String, // issuer (UUID or unique session)
     pub aud: String, // audience (Service Name)
@@ -85,6 +88,23 @@ pub fn get_user_id_from_token(token: &str) -> Result<i32, String> {
     Ok(claims.sub)
 }
 
+/// ### Get Jwt Claims with validation.
+///
+/// ### Example
+///
+/// ```
+/// use nextera_utils::jwt::{get_jwt_claims_from_token};
+/// let access_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjMsImV4cCI6MTczMjIwMDQ3NywiaXNzIjoiTmV4dCBFcmEgQXV0aGVudGljYWl0b24gU2VydmljZSIsImF1ZCI6Ik5FWFQgRVJBIFVTRVIifQ.dSFOwqIq_FtTTU1GuB7KVROgQP6sjtfWRLtozG-JrR4";
+/// let success_result:i32 = 3;
+/// match get_jwt_claims_from_token(access_token){
+///     Ok(result)=>{
+///         assert_eq!(result.sub, success_result);
+///     },
+///     Err(e)=>{
+///             println!("{}" ,e)
+///         }
+///     };
+/// ```
 pub fn get_jwt_claims_from_token(token: &str) -> Result<Claims, String> {
     // Split the token into header, payload, and signature
     let parts: Vec<&str> = token.split('.').collect();
@@ -107,6 +127,57 @@ pub fn get_jwt_claims_from_token(token: &str) -> Result<Claims, String> {
         .map_err(|e| format!("Failed to deserialize claims: {}", e))?;
 
     Ok(claims)
+}
+
+/// ### Generate JWT Token with Secret.
+///
+/// ### Example
+///
+/// ```
+/// use nextera_utils::jwt::{generate_jwt};
+/// let user_id = 1;
+/// let org_id = 1;
+/// let secret = "YourOrgSecret";
+/// let success_result:i32 = 3;
+/// match generate_jwt(user_id, org_id, secret, 3600, "Next Era Authentication Service", "NEXTERA USER"){
+///     Ok(result)=>{
+///             println!("{}" ,result.0.as_str());
+///             assert_eq!(result.0.len() > 0, true);
+///     },
+///     Err(e)=>{
+///             println!("{}" ,e)
+///         }
+///     };
+/// ```
+pub fn generate_jwt<'a>(
+    user_id: i32,
+    org_id: i32,
+    secret: &str,
+    expires_in_sec: i64,
+    issuer: &str,
+    audience: &str,
+) -> Result<(String, NaiveDateTime), &'a str> {
+    let expire_datetime = Time::get_utc()
+        .checked_add_signed(Duration::seconds(expires_in_sec))
+        .expect("valid timestamp");
+    let expire_timestamp = expire_datetime.and_utc().timestamp() as usize;
+    let claims = Claims {
+        sub: user_id.to_owned(),
+        org: org_id.to_owned(),
+        exp: expire_timestamp,
+        iss: issuer.to_owned(),
+        aud: audience.to_owned(),
+    };
+
+    Ok((
+        encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(secret.as_ref()),
+        )
+            .expect("Error creating token"),
+        expire_datetime,
+    ))
 }
 
 fn normalize_base64(input: &str) -> String {

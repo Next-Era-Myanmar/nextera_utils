@@ -123,13 +123,27 @@ mod tests {
 
     #[test]
     fn testing_jwt() {
-        let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjMsImV4cCI6MTczMjIwMDQ3NywiaXNzIjoiTmV4dCBFcmEgQXV0aGVudGljYWl0b24gU2VydmljZSIsImF1ZCI6Ik5FWFQgRVJBIFVTRVIifQ.dSFOwqIq_FtTTU1GuB7KVROgQP6sjtfWRLtozG-JrR4";
-        let secret =
-            "ACCESS_SECRET_2024!@#super_secure_random_string_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let audience = "NEXT ERA USER";
+        let user_id = 1;
+        let org_id = 1;
+        let secret = "YourOrgSecret";
+        let audience = "NEXTERA USER";
+        // Generate Test
+        let t = match jwt::generate_jwt(user_id, org_id, secret, 86400, "Next Era Authentication Service", audience) {
+            Ok((token, _)) => {
+                assert!(token.clone().len() > 0);
+                token
+            }
+            Err(e) => {
+                panic!("Failed to generate JWT: {}", e);
+            }
+        };
+        let token = t.as_str();
+        // Validate Test
         match validate_jwt(token, secret, audience) {
-            Ok(_) => {
-                panic!("Expired Token!")
+            Ok(result) => {
+                assert_eq!(result.claims.sub, user_id);
+                assert_eq!(result.claims.org, org_id);
+                assert_eq!(result.claims.aud, audience.to_string())
             }
             Err(_) => {
                 println!("Token is expired!");
@@ -138,7 +152,7 @@ mod tests {
         };
         match get_user_id_from_token(token) {
             Ok(result) => {
-                assert_eq!(result, 3)
+                assert_eq!(result, user_id)
             }
             Err(_) => {
                 panic!("Failed to get user id")
@@ -146,9 +160,9 @@ mod tests {
         }
         match get_jwt_claims_from_token(token) {
             Ok(result) => {
-                assert_eq!(result.sub, 3);
-                assert_eq!(result.iss, String::from("Next Era Authenticaiton Service"));
-                assert_eq!(result.exp, 1732200477usize);
+                assert_eq!(result.sub, user_id);
+                assert_eq!(result.iss, String::from("Next Era Authentication Service"));
+                assert_eq!(result.org, org_id);
                 assert_eq!(result.aud, audience.to_string());
             }
             Err(_) => {
