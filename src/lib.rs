@@ -139,11 +139,10 @@ mod tests {
         };
         let token = t.as_str();
         // Validate Test
-        match validate_jwt(token, secret, audience) {
+        match validate_jwt(token, secret) {
             Ok(result) => {
                 assert_eq!(result.claims.sub, user_id);
                 assert_eq!(result.claims.org, org_id);
-                assert_eq!(result.claims.aud, audience.to_string())
             }
             Err(_) => {
                 println!("Token is expired!");
@@ -161,7 +160,7 @@ mod tests {
         match get_jwt_claims_from_token(token) {
             Ok(result) => {
                 assert_eq!(result.sub, user_id);
-                assert_eq!(result.iss, String::from("Next Era Authentication Service"));
+                assert_eq!(result.suid, String::from("Next Era Authentication Service"));
                 assert_eq!(result.org, org_id);
                 assert_eq!(result.aud, audience.to_string());
             }

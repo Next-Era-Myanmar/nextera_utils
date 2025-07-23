@@ -11,7 +11,7 @@ pub struct Claims {
     pub sub: i32,    // subject (user ID)
     pub org: i32,    // organization ID
     pub exp: usize,  // expiration timestamp
-    pub iss: String, // issuer (UUID or unique session)
+    pub suid: String, // session uuid (UUID or unique session)
     pub aud: String, // audience (Service Name)
 }
 
@@ -24,9 +24,9 @@ pub struct Claims {
 /// let access_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjMsImV4cCI6MTczMjIwMDQ3NywiaXNzIjoiTmV4dCBFcmEgQXV0aGVudGljYWl0b24gU2VydmljZSIsImF1ZCI6Ik5FWFQgRVJBIFVTRVIifQ.dSFOwqIq_FtTTU1GuB7KVROgQP6sjtfWRLtozG-JrR4";
 /// let secret = "ACCESS_SECRET_2024!@#super_secure_random_string_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /// let audience = "NEXT ERA USER";
-/// match validate_jwt(access_token,secret,audience){
+/// match validate_jwt(access_token, secret){
 ///     Ok(result)=>{
-///         assert_eq!(result.claims.aud.as_str(),audience);
+///         assert_eq!(result.claims.aud.as_str(), audience);
 ///     },
 ///     Err(e)=>{
 ///             println!("{}" ,e)
@@ -36,10 +36,8 @@ pub struct Claims {
 pub fn validate_jwt(
     token: &str,
     secret: &str,
-    expected_audience: &str,
 ) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error> {
-    let mut validation = Validation::default();
-    validation.set_audience(&[expected_audience]);
+    let validation = Validation::default();
     decode::<Claims>(
         token,
         &DecodingKey::from_secret(secret.as_ref()),
@@ -154,7 +152,7 @@ pub fn generate_jwt<'a>(
     org_id: i32,
     secret: &str,
     expires_in_sec: i64,
-    issuer: &str,
+    session_uuid: &str,
     audience: &str,
 ) -> Result<(String, NaiveDateTime), &'a str> {
     let expire_datetime = Time::get_utc()
@@ -165,7 +163,7 @@ pub fn generate_jwt<'a>(
         sub: user_id.to_owned(),
         org: org_id.to_owned(),
         exp: expire_timestamp,
-        iss: issuer.to_owned(),
+        suid: session_uuid.to_owned(),
         aud: audience.to_owned(),
     };
 
