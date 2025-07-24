@@ -24,7 +24,7 @@ pub struct Claims {
 /// let access_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjMsImV4cCI6MTczMjIwMDQ3NywiaXNzIjoiTmV4dCBFcmEgQXV0aGVudGljYWl0b24gU2VydmljZSIsImF1ZCI6Ik5FWFQgRVJBIFVTRVIifQ.dSFOwqIq_FtTTU1GuB7KVROgQP6sjtfWRLtozG-JrR4";
 /// let secret = "ACCESS_SECRET_2024!@#super_secure_random_string_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /// let audience = "NEXT ERA USER";
-/// match validate_jwt(access_token, secret){
+/// match validate_jwt(access_token, secret, audience){
 ///     Ok(result)=>{
 ///         assert_eq!(result.claims.aud.as_str(), audience);
 ///     },

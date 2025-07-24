@@ -139,13 +139,13 @@ mod tests {
         };
         let token = t.as_str();
         // Validate Test
-        match validate_jwt(token, secret) {
+        match validate_jwt(token, secret, audience) {
             Ok(result) => {
                 assert_eq!(result.claims.sub, user_id);
                 assert_eq!(result.claims.org, org_id);
             }
             Err(e) => {
-                panic!(e.to_string())
+                panic!("Failed to generate JWT: {}", e);
             }
         };
         match get_user_id_from_token(token) {

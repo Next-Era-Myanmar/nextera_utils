@@ -1,6 +1,6 @@
 [package]
 name = "nextera_utils"
-version = "0.1.15"
+version = "0.1.16"
 edition = "2021"
 authors = ["Nyan Lin Soe <nyan.ucsp@gmail.com>"]
 description = "Next Era Myanmar Solutions Utilities for Rust"
