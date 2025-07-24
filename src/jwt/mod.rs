@@ -36,8 +36,10 @@ pub struct Claims {
 pub fn validate_jwt(
     token: &str,
     secret: &str,
+    audience: &str,
 ) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error> {
-    let validation = Validation::default();
+    let mut validation = Validation::default();
+    validation.set_audience(&[audience]);
     decode::<Claims>(
         token,
         &DecodingKey::from_secret(secret.as_ref()),

@@ -144,9 +144,8 @@ mod tests {
                 assert_eq!(result.claims.sub, user_id);
                 assert_eq!(result.claims.org, org_id);
             }
-            Err(_) => {
-                println!("Token is expired!");
-                assert_eq!(true, true)
+            Err(e) => {
+                panic!(e.to_string())
             }
         };
         match get_user_id_from_token(token) {
